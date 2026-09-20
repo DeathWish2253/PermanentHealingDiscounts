@@ -41,3 +41,18 @@ Keep unrelated changes out. At completion, commit/push all task-relevant source/
 - Runtime Release Gate evidence must exercise the exact final artifact produced from the final committed build HEAD, not an intermediate or substitute artifact.
 - If an exact gated artifact later fails an authorized runtime test, treat the failure as authoritative for the affected behavior: the prior PASS is superseded, preserve its historical evidence, and handle the correction as a new release iteration.
 - After posting and verifying the detailed GitHub issue completion report, keep the final Codex chat response compact: final SHA, build result, runtime result when applicable, artifact path/size/SHA-256, GitHub report URL/comment ID, and BLOCKED status.
+
+## Full-state cross-PC handoff
+Cross-PC Handoff means preserving **all meaningful current local repository state** remotely so another authorized PC can sync/clone and continue from exactly where this PC stopped.
+
+Before declaring handoff complete:
+- inspect `git status --short --ignored`, branch/HEAD, tracking/ahead-behind state, tracked diff, untracked files, ignored files, local build/release artifacts, and relevant IDE/project metadata;
+- do not dismiss files merely because they are generated, ignored, machine-local, IDE-created, incomplete, or WIP;
+- preserve meaningful completed and incomplete work remotely, even when that requires a new remote iteration of an existing file;
+- explicitly classify every local-only item as **REMOTE-PRESERVED**, **N/A-DISPOSABLE**, **BLOCKED-SENSITIVE**, or **BLOCKED**;
+- never upload secrets, credentials, tokens, private keys, or other sensitive data; report only the category and secure re-provisioning requirement;
+- treat ignored files as N/A only after verifying they are reproducible/cache-only/nonessential and cannot contain work needed for exact continuation;
+- if a locally existing JAR/ZIP/build artifact is meaningful to the current working state, preserve it remotely or report BLOCKED rather than assuming it can be discarded.
+
+Acceptance test: if this PC were wiped after handoff, another authorized PC must be able to recover every meaningful piece of the current local development state needed to continue exactly where work stopped. Otherwise report **Cross-PC Handoff: FAIL/BLOCKED**.
+
