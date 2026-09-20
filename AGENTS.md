@@ -56,3 +56,6 @@ Before declaring handoff complete:
 
 Acceptance test: if this PC were wiped after handoff, another authorized PC must be able to recover every meaningful piece of the current local development state needed to continue exactly where work stopped. Otherwise report **Cross-PC Handoff: FAIL/BLOCKED**.
 
+### Preservation default
+Do not self-classify an existing local repository item as disposable merely because it is generated, reproducible, cached, ignored, IDE-created, or rebuildable. Every non-sensitive file or directory currently under the local repository root must be REMOTE-PRESERVED unless the user explicitly authorizes exclusion of that specific item or class of items. This includes current `build/` output, JARs, ZIPs, reports, generated resources, logs/evidence, IDE/project files, WIP, and incomplete iterations. `N/A-DISPOSABLE` requires explicit user authorization; Codex may not choose it independently.
+
