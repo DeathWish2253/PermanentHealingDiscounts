@@ -34,3 +34,10 @@ Report required gate items as PASS / N/A / BLOCKED. Any unresolved required item
 ## Git and handoff
 Do not reset, rebase, force-push, discard authoritative work, modify upstream, deploy, alter secrets, or bypass gates unless explicitly authorized.
 Keep unrelated changes out. At completion, commit/push all task-relevant source/tests/config/scripts/docs/evidence to the authorized branch, fetch remote state, verify local HEAD == remote HEAD, record the final SHA, and leave no task-relevant local-only work.
+
+## IDE, runtime, and completion hardening
+- Use available IntelliJ plugins/MCP/integration resources when they materially improve structured navigation, symbol search/usages, inspections, Gradle execution, debugger/runtime evidence, or test-server work. If an expected IntelliJ/MCP capability is unavailable or misconfigured, report the exact limitation instead of using blind/manual workarounds that broaden scope.
+- Runtime-sensitive changes require issue-defined runtime validation when compile/static evidence cannot prove behavior. When local runtime validation is authorized, prefer the configured IntelliJ-integrated Minecraft test server when practical and record exact Java/Paper/plugin versions plus relevant evidence.
+- Runtime Release Gate evidence must exercise the exact final artifact produced from the final committed build HEAD, not an intermediate or substitute artifact.
+- If an exact gated artifact later fails an authorized runtime test, treat the failure as authoritative for the affected behavior: the prior PASS is superseded, preserve its historical evidence, and handle the correction as a new release iteration.
+- After posting and verifying the detailed GitHub issue completion report, keep the final Codex chat response compact: final SHA, build result, runtime result when applicable, artifact path/size/SHA-256, GitHub report URL/comment ID, and BLOCKED status.
