@@ -138,3 +138,46 @@ Codex must verify the comment was actually posted, for example with `gh issue vi
 After the detailed GitHub report is posted, Codex's final chat response should stay compact and normally contain only the final SHA, build result, runtime result when applicable, artifact identity/hash, GitHub report URL/comment ID, and BLOCKED status.
 
 ChatGPT independently reviews the GitHub report, pushed source, build/runtime evidence, artifact correspondence, and handoff before accepting a task or release.
+
+## 11. Full-state cross-PC handoff
+For ISARN, **Cross-PC Handoff means a remotely recoverable snapshot of all meaningful current local repository state**, not merely completed source code.
+
+Before ChatGPT or Codex may report Cross-PC Handoff PASS, Codex must inventory and reconcile the local repository against the authoritative remote, including:
+- committed local commits not yet pushed;
+- tracked modifications;
+- untracked files;
+- ignored files that may contain meaningful project state;
+- generated artifacts such as JARs/ZIPs when they currently exist locally and may be needed to reproduce or continue the exact current state;
+- incomplete/WIP implementation;
+- local tests, scripts, configs, documentation, evidence, notes, patches, migration work, and task-related temporary outputs that contain meaningful state;
+- IDE/project metadata when it carries project configuration, run/debug/test-server setup, or other state needed to continue on another authorized computer;
+- local files that also exist remotely when the local copy is a newer or otherwise distinct iteration.
+
+Do **not** assume a file is disposable because it is generated, ignored, machine-local, IDE-created, incomplete, or normally excluded from Git. Every such item must be explicitly classified.
+
+Allowed classifications are:
+- **REMOTE-PRESERVED** — committed/pushed or otherwise uploaded to the authoritative remote in a form another authorized computer can retrieve;
+- **N/A-DISPOSABLE** — verified reproducible/cache-only/nonessential state whose absence cannot lose work or impede exact continuation;
+- **BLOCKED-SENSITIVE** — secrets, credentials, tokens, private keys, or other sensitive machine/user data that must not be propagated; record the category and required secure re-provisioning path without exposing the secret;
+- **BLOCKED** — meaningful state that cannot yet be preserved remotely.
+
+A handoff may overwrite, replace, or create a new remote iteration for existing files when necessary to preserve the current local state. Completed status is irrelevant: unfinished/WIP work must also be preserved if it exists locally and is meaningful.
+
+The handoff audit must inspect at minimum:
+- `git status --short --ignored`;
+- local branch/HEAD and remote tracking state;
+- commits ahead/behind remote;
+- tracked diff;
+- untracked files;
+- ignored files with an explicit meaningful-vs-disposable classification;
+- locally present build/release artifacts and their remote availability when meaningful;
+- IDE/project metadata relevant to continuation.
+
+The practical acceptance test is:
+
+> If the originating PC were wiped immediately after handoff, could another authorized PC sync/clone the authoritative remote and recover every meaningful piece of the current local plugin-development state needed to continue from exactly where work stopped?
+
+If the answer is no, Cross-PC Handoff is **FAIL/BLOCKED**.
+
+This rule is distinct from release-artifact publication. A downloadable public release asset may be a separate release requirement, but if a locally existing artifact is meaningful to the current working state, its preservation status must still be explicitly accounted for in the cross-PC handoff.
+
