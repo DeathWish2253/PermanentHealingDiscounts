@@ -181,3 +181,10 @@ If the answer is no, Cross-PC Handoff is **FAIL/BLOCKED**.
 
 This rule is distinct from release-artifact publication. A downloadable public release asset may be a separate release requirement, but if a locally existing artifact is meaningful to the current working state, its preservation status must still be explicitly accounted for in the cross-PC handoff.
 
+### Preservation default
+Codex may not self-classify an existing local repository item as disposable merely because it is generated, reproducible, cached, ignored, IDE-created, or rebuildable. Every non-sensitive file or directory currently existing under the local repository root requires **REMOTE-PRESERVED** status unless the user explicitly authorizes exclusion of that specific item or class of items.
+
+This includes current Gradle `build/` output, JARs, ZIPs, reports, generated resources, logs/evidence, IDE/project files, WIP, and incomplete iterations. Rebuildability is not a valid reason to omit an existing local artifact from the handoff.
+
+`N/A-DISPOSABLE` may be used only when the user has explicitly authorized exclusion of that specific local item or class of items. Codex does not have authority to make that exclusion decision on its own.
+
