@@ -13,8 +13,8 @@ Before editing: read this file and the active issue; run `git fetch origin`; ver
 
 ## Platform
 - Java 25.
-- Paper 26.3 Build #19.
-- Paper API `26.3.build.19-alpha`.
+- Paper 26.3 Build #25.
+- Paper API `26.3.build.25-alpha`.
 - Never guess APIs, dependencies, compatibility, behavior, build results, runtime results, or artifact state. Verify or report BLOCKED.
 
 ## Efficient execution
