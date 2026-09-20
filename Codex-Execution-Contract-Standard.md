@@ -1,208 +1,96 @@
-# Codex Execution Contract Standard
+# ISARN ChatGPT → Codex Execution Contract
 
-This document is a mandatory compliance standard for all ISARN Codex tasks in this repository.
+This document is binding on ChatGPT when preparing, reviewing, correcting, or handing work to Codex for this repository. It is **not a standing Codex prompt**. Codex should normally read only repository-root `AGENTS.md` plus the active task/issue.
 
-It applies in addition to:
-- the repository-root `AGENTS.md`;
-- the active GitHub issue/task contract;
-- project-level ISARN development and Release Gate requirements;
-- any plugin-specific checklist or authoritative baseline requirements.
+## 1. Role split
+ChatGPT is the primary analyst, researcher, planner, failure diagnostician, and ISARN Release Gate authority.
+Codex is the local execution resource for:
+- exact source edits;
+- exact build/test/runtime commands;
+- local compiler/NMS/runtime evidence unavailable to ChatGPT;
+- artifact generation/inspection;
+- authorized Git operations.
 
-If any instruction conflicts, stop and report **BLOCKED** rather than guessing or silently weakening a stricter requirement.
+Do not outsource broad research, architecture selection, failure diagnosis, or open-ended investigation to Codex when ChatGPT can do it first.
 
-## 1. Core execution rule
+## 2. Before assigning Codex
+ChatGPT must, as applicable:
+- inspect the live GitHub branch/HEAD, relevant source/diffs/issues/evidence;
+- consult binding repository/project requirements;
+- verify APIs/dependencies/compatibility from authoritative sources;
+- reuse verified unchanged facts rather than make Codex rediscover them;
+- cluster known failures by root cause;
+- define the smallest useful deterministic scope;
+- identify exact files/methods/behavior, exact validation commands, and explicit stop conditions.
 
-Codex is a scarce local execution resource. ChatGPT is the primary analyst, researcher, planner, reviewer, and Release Gate authority.
+Redundant project steps may be omitted when they merely repeat already-verified unchanged facts and the omission cannot weaken correctness or the Release Gate.
 
-Codex should primarily:
-- edit local source;
-- run Gradle/build/tests;
-- collect local compiler/NMS/runtime evidence unavailable to ChatGPT;
-- generate and verify artifacts;
-- perform authorized Git operations.
+## 3. Task construction
+Prefer Codex instructions of the form:
+1. verify only the minimum live state needed for safe execution;
+2. edit these exact files/areas;
+3. preserve these explicit invariants;
+4. run these exact targeted checks;
+5. if they pass, run these exact broader/final checks;
+6. if an unexpected failure occurs, capture raw evidence once and STOP for ChatGPT diagnosis;
+7. commit/push/verify remote handoff exactly as specified.
 
-Codex should not spend substantial context on broad investigations that ChatGPT can perform first.
+Do not write broad prompts such as “investigate and fix everything,” “audit until clean,” or “keep trying until it works” without first reducing them to bounded deterministic work.
 
-## 2. One issue per chat
-
+## 4. Efficiency
 - One GitHub issue = one fresh Codex chat.
-- Target a maximum of **250,000 context tokens per issue/chat**.
-- Do not continue unrelated issues in the same chat.
-- If the task cannot be completed safely within the scoped issue/context ceiling, stop and report:
-  **BLOCKED / NEEDS NEW ISSUE**.
+- Target under 250k context tokens per issue/chat.
+- Context size and Codex execution/5-hour usage are separate concerns; optimize both.
+- Large deterministic coding changes are acceptable.
+- Repeated reasoning, broad exploration, repeated logs, speculative fixes, and unnecessary full builds are not.
+- Use targeted compilation/tests during correction loops.
+- Reserve clean/full builds for final or genuinely necessary verification.
+- Never ask Codex to estimate usage it cannot observe.
 
-## 3. Mandatory startup verification
+## 5. Failure handling
+If Codex encounters an unexpected failure outside the deterministic task path:
+- do not let it enter an open-ended fix/retry loop;
+- have it return the exact command, working directory, exit code, relevant raw output, affected files/symbols, and current Git state;
+- ChatGPT diagnoses the root cause and supplies the next exact correction.
+A second attempt should be based on a concrete verified hypothesis, not another guess.
 
-Before editing, building, testing, packaging, or committing:
+## 6. Platform default
+Unless the repository/task explicitly overrides:
+- Java 25;
+- Paper 26.3 Build #25;
+- Paper API `26.3.build.25-alpha`.
 
-1. Read the active GitHub issue in full.
-2. Read repository-root `AGENTS.md`.
-3. Read this `Codex-Execution-Contract-Standard.md`.
-4. Verify authenticated GitHub access.
-5. Verify actual Git root.
-6. Verify authoritative branch.
-7. Verify local HEAD.
-8. Verify `origin` remotes.
-9. Run `git fetch origin`.
-10. Verify current remote authoritative HEAD.
-11. Check `git status --short`.
-12. Confirm the authoritative baseline required by the issue.
+Version text alone is insufficient: verify source/build config, resolved dependencies, APIs, metadata, and required runtime evidence.
 
-Live repository state overrides stale issue SHAs, stale documentation, and old local assumptions unless the issue explicitly states otherwise.
+## 7. Release Gate
+The project Release Gate remains binding:
+`BASELINE → IMPLEMENT/FIX → BUILD → AUDIT → FIX → REBUILD → RE-AUDIT until clean`.
+ChatGPT may collapse redundant repeated steps when authoritative inputs are unchanged, but may not skip required final verification.
 
-If a required baseline fact cannot be verified, report **BLOCKED**.
+Final committed source must receive, where applicable:
+- final clean build;
+- final affected/full audit;
+- all discovered required issues resolved or BLOCKED;
+- exact expected JAR verification;
+- contents/integrity/metadata/version;
+- SHA-256;
+- artifact ↔ final committed source/build correspondence;
+- exact final JAR packaged into release ZIP when required;
+- ZIP integrity/content verification.
 
-## 4. No guessing
+CI success or Codex PASS alone does not grant ISARN Release Gate approval.
 
-Never guess:
-- APIs;
-- dependency behavior;
-- compatibility;
-- source state;
-- build state;
-- artifact state;
-- runtime results;
-- test results;
-- Git state.
+## 8. Git / handoff
+Codex may edit/build/test/audit/commit/push only within task authorization.
+Never authorize merge of main, rebase, reset, force-push, discard of authoritative work, upstream modification, deployment, secret changes, or gate bypass unless the user explicitly authorizes it.
 
-Verify each required fact or mark it **BLOCKED**.
+Every task must end in a remotely reproducible handoff:
+- all task-relevant work committed/pushed;
+- remote branch contains final commits;
+- final branch and remote HEAD recorded;
+- no task-relevant local-only work;
+- another authorized computer can fetch and continue exactly.
 
-## 5. Preserve authoritative work
-
-Do not:
-- reset;
-- rebase;
-- force-push;
-- discard authoritative work;
-- overwrite newer remote work;
-- modify upstream;
-- deploy;
-- alter secrets;
-- bypass a failed state;
-- revert to a prior build solely to evade a discovered failure,
-
-unless explicitly authorized.
-
-A failed build/correction state becomes the current state to fix forward.
-
-## 6. Development efficiency loop
-
-Use the smallest useful execution loop:
-
-1. Capture a broad failure set once when needed.
-2. Cluster failures by root cause.
-3. Fix shared root causes, not symptoms one-by-one unless independent.
-4. Use incremental builds and targeted tests during correction.
-5. Run broader affected-subsystem tests after a cluster passes.
-6. Avoid repeated clean/full builds during intermediate fixes unless necessary for diagnosis.
-7. Do not re-audit unchanged baseline facts.
-8. Prefer machine-readable evidence for hashes, manifests, Git state, failure summaries, artifact inspection, and metadata.
-9. Keep interim reports compact.
-
-Efficiency never weakens final Release Gate requirements.
-
-## 7. Build and audit sequence
-
-Required development sequence:
-
-`BASELINE → IMPLEMENT/FIX → BUILD → AUDIT → FIX → REBUILD → RE-AUDIT until clean`
-
-Targeted checks are allowed between fixes.
-
-Final audit must cover all affected areas, including where applicable:
-- regressions;
-- stale/duplicate/dead/conflicting code;
-- imports and compile pathways;
-- dependency conflicts;
-- metadata/version;
-- API/runtime compatibility;
-- config/UI/behavior;
-- functionality preservation;
-- security;
-- plugin-specific integration requirements.
-
-CI success does not equal Release Gate approval.
-
-## 8. Final committed-source gate
-
-Before task completion, final committed source must receive all required final verification.
-
-Where the issue requires an artifact, verify:
-- final clean build from final committed source;
-- all discovered issues fixed or explicitly BLOCKED;
-- expected JAR;
-- JAR contents/integrity;
-- metadata/version;
-- SHA-256 checksum;
-- artifact ↔ final source/build correspondence;
-- exact artifact path/name;
-- release ZIP and ZIP integrity if required.
-
-Only package the exact JAR from the final successful build of final committed source.
-
-Do not claim a build PASS from a pre-fix, pre-commit, or stale artifact.
-
-## 9. Git / cross-computer handoff
-
-Every issue/task must end in a remotely reproducible handoff state.
-
-Codex must:
-- commit all task-relevant source/tests/config/scripts/docs/evidence;
-- push all task-relevant commits to the authorized remote branch;
-- fetch remote state after push;
-- verify local HEAD == remote authoritative HEAD;
-- record final branch and remote HEAD SHA;
-- leave no task-relevant local-only uncommitted/untracked work;
-- confirm another authorized computer can fetch/pull and continue exactly from that state.
-
-Reproducible caches, build directories, and IDE state do not need to be uploaded unless required as evidence.
-
-If any task-relevant work cannot be preserved remotely, report **BLOCKED**.
-
-## 10. Evidence/reporting
-
-Every required gate item must be classified as:
-- **PASS**
-- **N/A**
-- **BLOCKED**
-
-Any unresolved required item means the task is not complete.
-
-The final Codex report must be compact and include, as applicable:
-- actual starting branch/SHA;
-- files changed;
-- targeted validation results;
-- final build result;
-- artifact path/hash/size;
-- metadata/integrity result;
-- final branch;
-- final local HEAD;
-- final remote HEAD;
-- final `git status --short`;
-- remaining manual/runtime steps;
-- every unresolved blocker.
-
-Codex must not claim overall ISARN Release Gate approval. ChatGPT independently reviews the pushed source, evidence, build/artifact correspondence, and handoff.
-
-## 11. Stop conditions
-
-Stop and report **BLOCKED** rather than guessing when:
-- GitHub authentication/access is unavailable;
-- repository/root/branch/baseline cannot be verified;
-- required source or authoritative asset is missing;
-- required API behavior cannot be verified;
-- implementation cannot preserve required behavior;
-- targeted/final build fails and cannot be resolved within scope;
-- final artifact verification fails;
-- push fails;
-- local and remote HEAD do not match;
-- task-relevant work remains local-only;
-- continuing would exceed the issue scope or the 250k-token chat ceiling.
-
-## 12. ChatGPT handoff model
-
-Default workflow:
-
-`ChatGPT diagnose/research → scope smallest useful GitHub issue → fresh Codex chat → Codex edit/build/test → push all relevant work → ChatGPT independently review → repeat only as needed → final Release Gate`
-
-This document is binding for every Codex assignment, correction cycle, validation cycle, evidence report, and cross-computer handoff in this repository.
+## 9. Reporting
+Required gate items are PASS / N/A / BLOCKED. Any unresolved required item means GATE FAILED.
+ChatGPT independently reviews Codex output, pushed source, build/runtime evidence, artifact correspondence, and handoff before accepting a task or release.
